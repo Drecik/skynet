@@ -3,6 +3,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <assert.h>
+#include <arpa/inet.h>
 
 #include "lua.h"
 #include "lauxlib.h"
@@ -544,6 +545,44 @@ int mp_pack(lua_State *L) {
     return 1;
 }
 
+int mp_packex(lua_State *L) {
+    int nargs = lua_gettop(L);
+    int i;
+    mp_buf *buf;
+
+    if (nargs == 0)
+        return luaL_argerror(L, 0, "MessagePack pack needs input.");
+
+    if (!lua_checkstack(L, nargs))
+        return luaL_argerror(L, 0, "Too many arguments for MessagePack pack.");
+
+    buf = mp_buf_new(L);
+    for(i = 1; i <= nargs; i++) {
+        /* Copy argument i to top of stack for _encode processing;
+         * the encode function pops it from the stack when complete. */
+        luaL_checkstack(L, 1, "in function mp_check");
+        lua_pushvalue(L, i);
+
+        mp_encode_lua_type(L,buf,0);
+
+        lua_pushlstring(L,(char*)buf->b,buf->len);
+
+        /* Reuse the buffer for the next operation by
+         * setting its free count to the total buffer size
+         * and the current position to zero. */
+        buf->free += buf->len;
+        buf->len = 0;
+    }
+    mp_buf_free(L, buf);
+
+    /* Concatenate all nargs buffers together */
+    lua_concat(L, nargs);
+    uint32_t len = htonl(lua_rawlen(L, -1));
+
+    lua_pushlstring(L, (const char*)&len, sizeof(len));
+    return 2;
+}
+
 /* ------------------------------- Decoding --------------------------------- */
 
 void mp_decode_to_lua_type(lua_State *L, mp_cur *c);
@@ -891,6 +930,7 @@ int mp_safe(lua_State *L) {
 /* -------------------------------------------------------------------------- */
 const struct luaL_Reg cmds[] = {
     {"pack", mp_pack},
+    {"packex", mp_packex},
     {"unpack", mp_unpack},
     {"unpack_one", mp_unpack_one},
     {"unpack_limit", mp_unpack_limit},
