@@ -13,3 +13,9 @@ standalone = "0.0.0.0:2013"
 -- snax_interface_g = "snax_g"
 cpath = root.."cservice/?.so"
 -- daemon = "./skynet.pid"
+
+server_id = 1
+
+db_host = "127.0.0.1"
+db_port = "27017"
+db_name = "test"
