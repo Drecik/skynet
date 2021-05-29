@@ -15,7 +15,7 @@ Mailbox.__index = function(t, k)
         end
     elseif k == "unpack" then
         return function(m, data)
-            if m ~=t then
+            if m ~= t then
                 data = m
             end
             t.addr = data.addr
@@ -29,7 +29,7 @@ Mailbox.__index = function(t, k)
             if m == t then
                 return skynet.call(t.addr, "xc", k, ...)
             else
-                return skynet.call(t.addr, "xc", m, ...)
+                return skynet.call(t.addr, "xc", k, m, ...)
             end
         end
     end

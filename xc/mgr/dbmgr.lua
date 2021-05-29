@@ -28,7 +28,8 @@ function DBMgr:init()
 
     self.db = self.client:getDB(self.db_name)
     if not self.db then
-        xc.error("connect to mongo failed", self.host, self.port, self.db_name)
+        xc.error("connet to mongo failed", self.host, self.port, self.db_name)
+        return false
     end
 
     xc.log("connect to mongo succ", self.host, self.port, self.db_name)
@@ -36,11 +37,11 @@ function DBMgr:init()
 end
 
 function DBMgr:insert(collection, doc)
-    return self.db:getCollection(collection):insert(doc)
+    self.db:getCollection(collection):insert(doc)
 end
 
 function DBMgr:batchInsert(collection, docs)
-    return self.db:getCollection(collection):batch_insert(docs)
+    self.db:getCollection(collection):batch_insert(docs)
 end
 
 function DBMgr:delete(collection, selector, max_delete_count)
@@ -60,7 +61,7 @@ function DBMgr:findAll(collection, query, selector, limit)
     local result = {}
     local cursor = self.db:getCollection(collection):find(query, selector)
     if limit then
-        cursor:limit(cursor)
+        cursor:limit(limit)
     end
     while cursor:hasNext() do
         local doc = cursor:next()

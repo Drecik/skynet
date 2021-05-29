@@ -23,6 +23,7 @@ function Bootstrap:init()
     for name, mgr in pairs(self.mgrs) do
         if not mgr:init() then
             xc.error("init mgr: " .. name .. " failed!!")
+            return
         else
             xc.log("init mgr: " .. name .. " succ...")
         end
@@ -31,6 +32,7 @@ function Bootstrap:init()
     for name, mgr in pairs(self.mgrs) do
         if not mgr:start() then
             xc.error("start mgr: " .. name .. " failed!!")
+            return
         else
             xc.log("start mgr: " .. name .. " succ...")
         end

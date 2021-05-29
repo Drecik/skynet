@@ -22,7 +22,7 @@ function Player:onCreate(account_id)
     self.gbId = xc.mgr.idmgr.generateGbId()
     self.account_id = account_id
 
-    xc.mgr.dbmgr.insert("player", self.pack())
+    xc.mgr.dbmgr.insert("player", self:pack())
 
     xc.log("on create", self.gbId)
 end
@@ -66,4 +66,4 @@ function Player:cs_kickoff()
     self:kickoff()
 end
 
-return xc.start(Player)
+xc.start(Player)

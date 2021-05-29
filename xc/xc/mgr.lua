@@ -3,7 +3,7 @@ local mailbox = require "service.mailbox"
 
 local mgr_mailboxes = {}
 local function mgr_mailbox(name)
-    local mb = mgr_mailbox[name]
+    local mb = mgr_mailboxes[name]
     if mb then
         return mb
     end

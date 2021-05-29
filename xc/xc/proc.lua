@@ -37,6 +37,12 @@ local function unpack(t)
     end
 end
 
+function xc.unpack(msg, sz)
+    local datas = {skynet.unpack(msg, sz)}
+    unpack(datas)
+    return table.unpack(datas)
+end
+
 function xc.register_protocol()
     skynet.register_protocol{
         name = "xc",
@@ -47,6 +53,7 @@ function xc.register_protocol()
 end
 
 function xc.start(class, func)
+    xc.register_protocol()
     skynet.start(function()
         local ins = class:new()
         skynet.dispatch("xc", function(_, _, func, ...)

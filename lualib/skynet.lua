@@ -41,7 +41,7 @@ local skynet = {
 	PTYPE_LUA = 10,
 	PTYPE_SNAX = 11,
 	PTYPE_TRACE = 12,	-- use for debug trace
-	PTYPE_XC = 13,
+	PTYPE_XC = 13
 }
 
 -- code cache
