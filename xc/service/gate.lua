@@ -18,7 +18,7 @@ function handler.connect(fd, addr)
     clients[fd] = {
         addr = addr,
         status = CLIENT_STATUS.INVALID,
-        agent = xc.newservice("service/login", fd, skynet.self()),
+        agent = xc.mgr.loginmgr,
         recv_limit = {}
     }
 
@@ -39,33 +39,28 @@ function handler.disconnect(fd)
         if client.agent:onDisconnect() then
             client.agent:exit()
         end
-        xc.info("diconnect", fd, client.addr)
+        xc.log("diconnect", fd, client.addr)
         clients[fd] = nil
     end
 end
 
 local CMD = {}
-function CMD.cs_login(client, session)
-    if string.len(session) ~= 0 then
+function CMD.cs_login(client, account_id, session)
+    if string.len(session) ~= 0 and client.status == CLIENT_STATUS.INVALID then
         client.status = CLIENT_STATUS.VALID
+
+        local player = xc.newservice("player/player")
+        player:bind(account_id, client.fd, skynet.self())
+        client.agent = player
     end
+    xc.log('[cs_login]', client.addr, session)
     return session
 end
 
-function CMD.cs_enterGame(client, ret, player)
-    if ret then
-        client.agent:exit()
-        client.agent = player
-
-        xc.log("[cs_enterGame]", client.addr, player.addr)
-    end
-    return ret
-end
-
 function CMD.dispatch(fd, func_name, ...)
-    local packStr, lenStr = cmsgpack.packex({0, func_name, {...}})
-    socketdriver.send(fd, lenStr)
-    socketdriver.send(fd, packStr)
+    local pack_str, len_str = cmsgpack.packex({0, func_name, {...}})
+    socketdriver.send(fd, len_str)
+    socketdriver.send(fd, pack_str)
 end
 
 function CMD.kickoff(fd)
@@ -80,6 +75,8 @@ function handler.message(fd, msg, sz)
         local str = netpack.tostring(msg, sz)
         local data = cmsgpack.unpack(str)
         local session_id, func_name = data[1], data[2]
+
+        xc.log("message", session_id, func_name)
 
         if string.sub(func_name, 1, 3) ~= "cs_" then
             xc.warn("invalid func_name", func_name, client.addr)
@@ -103,9 +100,9 @@ function handler.message(fd, msg, sz)
         end
 
         if #response > 0 then
-            local packStr, lenStr = cmsgpack.packex({session_id, "", response})
-            socketdriver.send(fd, lenStr)
-            socketdriver.send(fd, packStr)
+            local pack_str, len_str = cmsgpack.packex({session_id, "", response})
+            socketdriver.send(fd, len_str)
+            socketdriver.send(fd, pack_str)
         end
     end
 end

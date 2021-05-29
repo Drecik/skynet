@@ -5,8 +5,14 @@ local mailbox = require "service.mailbox"
 
 local Player = class.createClass()
 
-local client_fd, gate = ...
 function Player:ctor()
+    self.mailbox = mailbox:new({addr = skynet.self()})
+end
+
+function Player:bind(account_id, client_fd, gate)
+    self.account_id = account_id
+    self.client_fd = client_fd
+    self.gate = gate
     self.client = setmetatable({}, {
         __index = function(_, k)
             return function(...)
@@ -14,23 +20,27 @@ function Player:ctor()
             end
         end
     })
-
-    self.mailbox = mailbox:new({addr = skynet.self()})
 end
 
-function Player:onCreate(account_id)
-    self.gbId = xc.mgr.idmgr.generateGbId()
-    self.account_id = account_id
+function Player:cs_enterGame()
+    xc.log('[cs_enterGame]', self.account_id)
 
+    local player_data = xc.mgr.dbmgr.findOne("player", {account_id = self.account_id})
+    if not player_data then
+        self:onCreate()
+    else
+        self:unpack(player_data)
+    end
+
+    xc.mgr.playermgr.onLogin(self.gbId, self.mailbox)
+    return true
+end
+
+function Player:onCreate()
+    self.gbId = xc.mgr.idmgr.generateGbId()
     xc.mgr.dbmgr.insert("player", self:pack())
 
     xc.log("on create", self.gbId)
-end
-
-function Player:load(data)
-    self:unpack(data)
-
-    xc.log("load succ", self.gbId)
 end
 
 function Player:unpack(d)
@@ -45,25 +55,14 @@ function Player:pack()
     }
 end
 
-function Player:onEnterGame()
-    xc.log("on enter", self.gbId)
-    xc.mgr.playermgr.onLogin(self.gbId, self.mailbox)
-    return true
-end
-
 function Player:onDisconnect()
     xc.log("on disconnect", self.gbId)
     xc.mgr.playermgr.onLogout(self.gbId)
-    return true
 end
 
 function Player:kickoff()
     xc.log("kickoff", self.gbId)
-    skynet.send(gate, "lua", "kickoff", client_fd)
-end
-
-function Player:cs_kickoff()
-    self:kickoff()
+    skynet.send(self.gate, "lua", "kickoff", self.client_fd)
 end
 
 xc.start(Player)

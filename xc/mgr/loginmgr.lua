@@ -7,13 +7,14 @@ local LoginMgr = class.createClass(imgr)
 function LoginMgr:ctor()
 end
 
-function LoginMgr:login(...)
+function LoginMgr:cs_login(account_id, ...)
     -- TODO: 检测账号信息，生成session
-    return "1"
+    xc.log("[login]", ...)
+    local session = "1"
+    return account_id, session
 end
 
-function LoginMgr:verify(account_id, session)
-    return true
+function LoginMgr:onDisconnect()
 end
 
 xc.start(LoginMgr)
