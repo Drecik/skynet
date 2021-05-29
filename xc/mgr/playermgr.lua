@@ -4,10 +4,7 @@ local imgr = require "mgr.imgr"
 
 local PlayerMgr = class.createClass(imgr)
 
-local mgr_name = ...
 function PlayerMgr:ctor()
-    xc.register(mgr_name)
-
     self.players = {}
     self.online_cnt = 0
 end

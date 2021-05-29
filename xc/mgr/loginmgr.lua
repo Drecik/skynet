@@ -4,9 +4,7 @@ local imgr = require "mgr.imgr"
 
 local LoginMgr = class.createClass(imgr)
 
-local mgr_name = ...
 function LoginMgr:ctor()
-    xc.register(mgr_name)
 end
 
 function LoginMgr:login(...)

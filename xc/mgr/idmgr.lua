@@ -5,10 +5,7 @@ local imgr = require "mgr.imgr"
 
 local IdMgr = class.createClass(imgr)
 
-local mgr_name = ...
 function IdMgr:ctor()
-    xc.register(mgr_name)
-
     self.server_id = xc.config("server_id") or 0
     self.last_time = self:time()
     self.index = 0

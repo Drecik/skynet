@@ -1,4 +1,4 @@
-local xc = require "xc"
+local xc = require "xc.def"
 local mailbox = require "service.mailbox"
 
 local mgr_mailboxes = {}

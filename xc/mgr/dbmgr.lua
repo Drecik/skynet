@@ -6,9 +6,7 @@ local imgr = require "mgr.imgr"
 
 local DBMgr = class.createClass(imgr)
 
-local mgr_name = ...
 function DBMgr:ctor()
-    xc.register(mgr_name)
 end
 
 function DBMgr:init()

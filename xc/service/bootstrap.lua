@@ -1,4 +1,5 @@
 local skynet = require "skynet"
+skynet = require "skynet.manager"
 local xc = require "xc"
 local class = require "utils.class"
 
@@ -17,7 +18,9 @@ end
 
 function Bootstrap:init()
     for _, name in ipairs(mgr_names) do
-        self.mgrs[name] = xc.newservice("mgr/" .. name, name)
+        local mailbox = xc.newservice("mgr/" .. name)
+        skynet.name('.' .. name, mailbox.addr)
+        self.mgrs[name] = mailbox
     end
 
     for name, mgr in pairs(self.mgrs) do
